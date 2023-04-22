@@ -2,6 +2,8 @@ import './App.css';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import './PokeAPI.js'
+// ------------------[ Global variables ]------------------ //
+
 
 // ------------------[ Main method ]------------------ //
 
@@ -21,10 +23,14 @@ const PokeInfo = () => {
         backgroundColor: 'yellow',
         flex: 2  
       }
-      ]}></View>)
+      ]}>
+
+    </View>)
 }
 
 const PokeList = () => {
+  const [pokeImage, setImages] = React.useState(Array(25).fill())
+
   return (
     <View style={[
       styles.container, 
