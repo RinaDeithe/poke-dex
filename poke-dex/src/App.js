@@ -20,24 +20,26 @@ const PokeInfo = () => {
     <View style={[
       styles.container, 
       {
-        backgroundColor: 'yellow',
-        flex: 2  
+        flex: 2,
+        marginRight: 10
       }
       ]}>
+        <View style={[{
+          flexDirection: 'column'}
+        ]}>
 
+        </View>
     </View>)
 }
 
 const PokeList = () => {
-  const [pokeImage, setImages] = React.useState(Array(25).fill())
+  const [page, setPages] = React.useState(1)
 
   return (
     <View style={[
       styles.container, 
       {
-        backgroundColor: 'red',
-        flex: 7
-        
+        flex: 7 
       }
       ]}>
         
@@ -48,7 +50,7 @@ const PokeList = () => {
 // ------------------[ Pokemon Components ]------------------ //
 
 function PokeImage(src) {
-  return <image src={src} alt="Image" />
+  return <box  />
 }
 
 // ------------------[ Style Sheets ]------------------ //
@@ -57,12 +59,17 @@ const styles = StyleSheet.create({
   index: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'green',
     height: 700,
-    padding: 20,
+    padding: 20
   },
   container: {
-    padding: 10
+    borderRadius: 10,
+    shadowColor: 'black',
+    shadowRadius: 4,
+    backgroundColor: '#F0F8FF'
+  },
+  image: {
+    margin: 10
   }
 })
 
