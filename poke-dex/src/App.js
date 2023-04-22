@@ -1,49 +1,59 @@
 import './App.css';
-import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {StyleSheet, View, Text, Image} from 'react-native';
 // ------------------[ Global variables ]------------------ //
-
 
 // ------------------[ Main method ]------------------ //
 
 const Flex = () => {
+  useEffect(() => { document.body.style.backgroundColor = '#000000' }, [])
+  const [pokemonProp, setPokemon] = useState(null);
 
-  const [pokemon, setPokemon] = React.useState(GetPokemon("ditto"))
+  useEffect(() => {
+    GetPokemon("salazzle").then((object) => setPokemon(object));
+  }, []);
 
   return (
-  <View style={styles.index}>
-    <PokeInfo pokemon={pokemon}/>
-    <PokeList/>
-  </View>
-)};
+    <View style={styles.index}>
+      <PokeInfo pokemon={pokemonProp}/>
+      <PokeList/>
+    </View>
+  );
+};
 
-// ------------------[ Info side ]------------------ //
+// ------------------[ Info side ]------------------ // 
 
-function PokeInfo(pokemon) {
-  return (
+function PokeInfo({ pokemon }) {
+  return pokemon ? (
     <View style={[
       styles.container, 
       {
-        flex: 2,
+        flex: 2, 
         marginRight: 10,
-        flexDirection: 'column'
+        flexDirection: 'column',
       }
-      ]}>
-        <PokeImage pokemon={pokemon}/>
-        <PokeDescription/>
-    </View>)
+    ]}>
+      <PokeImage pokemon={pokemon}/>
+      <PokeDescription pokemon={pokemon}/>
+    </View>
+  ) : null;
 }
 
 // ------------------[ PokeDesc Components ]------------------ //
 
-function PokeImage(pokemon) {
-  return <View style={[{flex: 1, backgroundColor: 'yellow', margin: 20}]}>
-    <img/>
+function PokeImage({pokemon}) {
+  return <View style={[styles.container,{flex: 1, margin: 20, alignItems: 'center'}]}>
+    <Image source={pokemon.sprites.front_default} style={{ height: "100%", width: "60%" }} />
   </View>
 }
 
-function PokeDescription(pokemon) {
-  return <View style={[{flex: 2, backgroundColor: 'green', margin: 20}]} >
+function PokeDescription({pokemon}) {
+  return <View style={[styles.container,{flex: 2, margin: 20, padding: 10}]} >
+    <p>Name: {pokemon.name}</p>
+    <p>ID: {pokemon.id}</p>
+    <p>Weight: {pokemon.weight/10}</p>
+    <p>Height: {pokemon.height}</p>
+    
 
   </View>
 }
@@ -51,51 +61,61 @@ function PokeDescription(pokemon) {
 // ------------------[ List side ]------------------ //
 
 const PokeList = () => {
-  const [page, setPage] = React.useState(0)
+  const [pokemons, setPokemons] = useState([]);
 
-  let pokemons = ShowPokemons(page)
+  useEffect(() => {
+    ShowPokemons(50).then((data) => setPokemons(data));
+  }, []);
 
   return (
-    <View style={[
-      styles.container, 
-      {
-        flex: 7 
-      }
-    ]}>
-      <View style={[{flexDirection: 'row', flex: 1}]}>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
+    <View
+      style={[
+        styles.container,
+        {
+          flex: 7,
+        },
+      ]}
+    >
+      <View style={[{ flexDirection: "row", flex: 1 }]}>
+        {pokemons.slice(0, 5).map((pokemon) => (
+          <PokeCard key={pokemon.name} pokemon={pokemon} />
+        ))}
       </View>
-      <View style={[{flexDirection: 'row', flex: 1}]}>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
+      <View style={[{ flexDirection: "row", flex: 1 }]}>
+        {pokemons.slice(5, 10).map((pokemon) => (
+          <PokeCard key={pokemon.name} pokemon={pokemon} />
+        ))}
       </View>
-      <View style={[{flexDirection: 'row', flex: 1}]}>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
-        <PokeCard/>
+      <View style={[{ flexDirection: "row", flex: 1 }]}>
+        {pokemons.slice(10, 15).map((pokemon) => (
+          <PokeCard key={pokemon.name} pokemon={pokemon} />
+        ))}
       </View>
     </View>
-  )
-}
+  );
+};
 
 // ------------------[ List Components ]------------------ //
 
-function PokeCard(pokemon) {
+function PokeCard({ pokemon }) {
   return (
-    <View style={[styles.container, {flex: 1, borderTopWidth: 1, borderColor: 'black', backgroundColor: 'white', margin: 10, alignItems: 'center'}]}>
-      <img/>
-      <p>{pokemon["name"]} tempTest</p>
+    <View
+      style={[
+        styles.container,
+        {
+          flex: 1,
+          borderTopWidth: 1,
+          borderColor: "black",
+          backgroundColor: "white",
+          margin: 10,
+          alignItems: "center",
+        },
+      ]}
+    >
+      <Image source={{ uri: pokemon.image }} style={{ height: "80%", width: "80%" }} />
+      <Text>{pokemon.name}</Text>
     </View>
-  )
+  );
 }
 
 // ------------------[ Style Sheets ]------------------ //
@@ -105,7 +125,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     height: 700,
-    padding: 20
+    padding: 40
   },
   container: {
     borderRadius: 10,
@@ -121,36 +141,27 @@ const styles = StyleSheet.create({
 // ------------------[ Poke API calls ]------------------ //
 
 async function GetPokemon(pokemon) {
-  try {
-      await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemon)
-          .then(response => {
-              if (response.ok) return response.json();
-              else new Error("Pokemon or network not found.");
-          })
-  }   
-  catch {
-      return null
-  }
+  return await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
+                    .then(response => response.json())
 }
 
 async function ShowPokemons(page) {
+  let offset = page * 15;
 
-  let offset = page*15
+  const response = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=15&offset=${offset}`
+  );
+  const data = await response.json();
 
-  try {
-      await fetch(`pokemon?limit=15&offset=${offset}`)
-          .then(response => response.json())
-          .then(data => {
-            let results = data.results.map(result => {
-              return fetch(result.url)
-                    .then(response => response.json())
-            })
-            return Promise.all(results);
-          })
-  }   
-  catch {
-      return null
-  }
+  const pokemonUrls = data.results.map((result) => result.url);
+  const pokemonData = await Promise.all(
+    pokemonUrls.map((url) => fetch(url).then((res) => res.json()))
+  );
+
+  return pokemonData.map((pokemon) => ({
+    name: pokemon.name,
+    image: pokemon.sprites.front_default,
+  }));
 }
 
 export default Flex;
