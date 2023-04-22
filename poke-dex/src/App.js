@@ -8,6 +8,9 @@ import './PokeAPI.js'
 // ------------------[ Main method ]------------------ //
 
 const Flex = () => {
+
+  const [pokemon, setPokemon] = React.useState(null)
+
   return (
   <View style={styles.index}>
     <PokeInfo/>
@@ -15,22 +18,34 @@ const Flex = () => {
   </View>
 )};
 
+// ------------------[ Info side ]------------------ //
+
 const PokeInfo = () => {
   return (
     <View style={[
       styles.container, 
       {
         flex: 2,
-        marginRight: 10
+        marginRight: 10,
+        flexDirection: 'column'
       }
       ]}>
-        <View style={[{
-          flexDirection: 'column'}
-        ]}>
-
-        </View>
+        <PokeImage/>
+        <PokeDescription/>
     </View>)
 }
+
+// ------------------[ PokeDesc Components ]------------------ //
+
+function PokeImage(src) {
+  return <View style={[{flex: 1, backgroundColor: 'yellow', margin: 20}]}></View>
+}
+
+function PokeDescription() {
+  return <View style={[{flex: 2, backgroundColor: 'green', margin: 20}]} />
+}
+
+// ------------------[ List side ]------------------ //
 
 const PokeList = () => {
   const [page, setPages] = React.useState(1)
@@ -41,16 +56,41 @@ const PokeList = () => {
       {
         flex: 7 
       }
-      ]}>
-        
+    ]}>
+      <View style={[{flexDirection: 'row', flex: 1}]}>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+      </View>
+      <View style={[{flexDirection: 'row', flex: 1}]}>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+      </View>
+      <View style={[{flexDirection: 'row', flex: 1}]}>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+        <PokeCard/>
+      </View>
     </View>
   )
 }
 
-// ------------------[ Pokemon Components ]------------------ //
+// ------------------[ List Components ]------------------ //
 
-function PokeImage(src) {
-  return <box  />
+function PokeCard(pokemon) {
+  return (
+    <View style={[styles.container, {flex: 1, borderTopWidth: 1, borderColor: 'black', backgroundColor: 'white', margin: 10}]}>
+      <img />
+      <p>{pokemon["name"]} tempTest</p>
+    </View>
+  )
 }
 
 // ------------------[ Style Sheets ]------------------ //
