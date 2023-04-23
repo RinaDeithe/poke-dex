@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, Image, TouchableOpacity, Pressable} from 'react-native';
 // ------------------[ Global variables ]------------------ //
 
 // ------------------[ Main method ]------------------ //
@@ -8,6 +8,7 @@ import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 const Flex = () => {
   useEffect(() => { document.body.style.backgroundColor = '#000000' }, [])
   const [pokemonProp, setPokemon] = useState(null);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     GetPokemon("klinklang").then((object) => setPokemon(object));
@@ -19,20 +20,20 @@ const Flex = () => {
 
   return (
     <View style={styles.index}>
-      <PokeInfo pokemon={pokemonProp}/>
-      <PokeList onPokeCardClick={handlePokeCardClick}/>
+      <PokeInfo pokemon={pokemonProp} setCurrentPage={setPage} currentPage={page}/>
+      <PokeList onPokeCardClick={handlePokeCardClick} currentPage={page}/>
     </View>
   );
 };
 
 // ------------------[ Info side ]------------------ // 
 
-function PokeInfo({ pokemon }) {
+function PokeInfo({ pokemon, setCurrentPage, currentPage }) {
   return pokemon ? (
     <View style={[styles.container, {flex: 2, marginRight: 10,flexDirection: 'column',}]}>
       <PokeImage pokemon={pokemon}/>
       <PokeDescription pokemon={pokemon}/>
-      <PrevNext></PrevNext>
+      <PrevNext setPage={setCurrentPage} page={currentPage}></PrevNext>
     </View>
   ) : null;
 }
@@ -51,32 +52,41 @@ function PokeDescription({pokemon}) {
     <p>ID: {pokemon.id}</p>
     <p>Weight: {pokemon.weight/10}</p>
     <p>Height: {pokemon.height}</p>
+    <p>Species: {pokemon.type}</p>
     
 
   </View>
 }
 
-function PrevNext() {
-  return <View style={[{flex: 1, flexDirection: 'row', alignContent: 'space-between', padding: 5}]}>
-    <Button input="prev"/>
-    <Button input="next"/>
-  </View>
-}
+function PrevNext({ setPage, page }) {
+  const onNext = () => {
+    setPage((page) => page + 1);
+  };
 
-function Button({input}) {
-  return (<View style={[styles.container,{backgroundColor: 'white',flex: 1, height:'80%', marginLeft: 10, marginRight: 10, alignItems: 'center', justifyContent: 'center'}]}>
-      <Text>{input}</Text>
-  </View>)
+  const onPrev = () => {
+    setPage((page) => page - 1);
+  };
+
+  return (
+    <View style={[{flex: 1, flexDirection: 'row', alignContent: 'space-between', padding: 5}]}>
+      <Pressable style={[styles.container, styles.button]} onPress={onPrev}>
+        <Text>prev</Text>
+      </Pressable>
+      <Pressable style={[styles.container, styles.button]} onPress={onNext}>
+        <Text>next</Text>
+      </Pressable>
+    </View>
+  );
 }
 
 // ------------------[ List side ]------------------ //
 
-function PokeList({ onPokeCardClick }) {
+function PokeList({ onPokeCardClick, currentPage }) {
   const [pokemons, setPokemons] = useState([]);
 
   useEffect(() => {
-    ShowPokemons(40).then((data) => setPokemons(data));
-  }, []);
+    ShowPokemons(currentPage).then((data) => setPokemons(data));
+  }, [currentPage]);
 
   return (
     <View style={[styles.container,{flex: 7,},]}>
@@ -139,6 +149,15 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     margin: 10,
     alignItems: "center"
+  },
+  button: {
+    backgroundColor: 'white',
+    flex: 1, 
+    height:'80%', 
+    marginLeft: 10, 
+    marginRight: 10, 
+    alignItems: 'center', 
+    justifyContent: 'center'
   }
 })
 
@@ -153,7 +172,8 @@ async function GetPokemon(pokemon) {
     image: data.sprites.front_default,
     id: data.id,
     weight: data.weight,
-    height: data.height
+    height: data.height,
+    type: data.types[0].type.name,
   };
 }
 
@@ -168,11 +188,17 @@ async function ShowPokemons(page) {
   const pokemonUrls = data.results.map((result) => result.url);
   const pokemonData = await Promise.all(
     pokemonUrls.map((url) => fetch(url).then((res) => res.json()))
-  );
+  ); 
+
+  console.log(pokemonData);
 
   return pokemonData.map((pokemon) => ({
     name: pokemon.name,
     image: pokemon.sprites.front_default,
+    id: pokemon.id,
+    weight: pokemon.weight,
+    height: pokemon.height,
+    type: pokemon.types[0].type.name,
   }));
 }
 
