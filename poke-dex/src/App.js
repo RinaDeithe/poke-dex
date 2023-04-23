@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, View, Text, Image} from 'react-native';
+import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 // ------------------[ Global variables ]------------------ //
 
 // ------------------[ Main method ]------------------ //
@@ -20,7 +20,7 @@ const Flex = () => {
   return (
     <View style={styles.index}>
       <PokeInfo pokemon={pokemonProp}/>
-      <PokeList/>
+      <PokeList onPokeCardClick={handlePokeCardClick}/>
     </View>
   );
 };
@@ -41,7 +41,7 @@ function PokeInfo({ pokemon }) {
 
 function PokeImage({pokemon}) {
   return <View style={[styles.container,{flex: 4, margin: 20, alignItems: 'center'}]}>
-    <Image source={pokemon.sprites.front_default} style={{ height: "100%", width: "60%" }} />
+    <Image source={{ uri: pokemon.image }} style={{ height: "100%", width: "60%" }} />
   </View>
 }
 
@@ -71,7 +71,7 @@ function Button({input}) {
 
 // ------------------[ List side ]------------------ //
 
-function PokeList({onPokeCardClick}) {
+function PokeList({ onPokeCardClick }) {
   const [pokemons, setPokemons] = useState([]);
 
   useEffect(() => {
@@ -82,31 +82,35 @@ function PokeList({onPokeCardClick}) {
     <View style={[styles.container,{flex: 7,},]}>
       <View style={[{ flexDirection: "row", flex: 1 }]}>
         {pokemons.slice(0, 5).map((pokemon) => (
-          <PokeCard key={pokemon.name} pokemon={pokemon}/>
+          <PokeCard key={pokemon.name} pokemon={pokemon} onPokeCardClick={onPokeCardClick} />
         ))}
       </View>
       <View style={[{ flexDirection: "row", flex: 1 }]}>
         {pokemons.slice(5, 10).map((pokemon) => (
-          <PokeCard key={pokemon.name} pokemon={pokemon} />
+          <PokeCard key={pokemon.name} pokemon={pokemon} onPokeCardClick={onPokeCardClick} />
         ))}
       </View>
       <View style={[{ flexDirection: "row", flex: 1 }]}>
         {pokemons.slice(10, 15).map((pokemon) => (
-          <PokeCard key={pokemon.name} pokemon={pokemon} />
+          <PokeCard key={pokemon.name} pokemon={pokemon} onPokeCardClick={onPokeCardClick} />
         ))}
       </View>
     </View>
   );
-};
+}
 
 // ------------------[ List Components ]------------------ //
 
-function PokeCard({ pokemon }) {
+function PokeCard({ pokemon, onPokeCardClick }) {
+  const handlePress = () => {
+    onPokeCardClick(pokemon);
+  };
+
   return (
-    <View style={[styles.container, styles.pokecard]}>
+    <TouchableOpacity onPress={handlePress} style={[styles.container, styles.pokecard]}>
       <Image source={{ uri: pokemon.image }} style={{ height: "80%", width: "80%" }} />
       <Text>{pokemon.name}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -116,7 +120,7 @@ const styles = StyleSheet.create({
   index: {
     flex: 1,
     flexDirection: 'row',
-    height: 700,
+    height: 780,
     padding: 40
   },
   container: {
@@ -141,8 +145,16 @@ const styles = StyleSheet.create({
 // ------------------[ Poke API calls ]------------------ //
 
 async function GetPokemon(pokemon) {
-  return await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
-                    .then(response => response.json())
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`);
+  const data = await response.json();
+
+  return {
+    name: data.name,
+    image: data.sprites.front_default,
+    id: data.id,
+    weight: data.weight,
+    height: data.height
+  };
 }
 
 async function ShowPokemons(page) {
