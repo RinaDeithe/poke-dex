@@ -10,8 +10,12 @@ const Flex = () => {
   const [pokemonProp, setPokemon] = useState(null);
 
   useEffect(() => {
-    GetPokemon("salazzle").then((object) => setPokemon(object));
+    GetPokemon("klinklang").then((object) => setPokemon(object));
   }, []);
+
+  const handlePokeCardClick = (pokemon) => {
+    setPokemon(pokemon);
+  };
 
   return (
     <View style={styles.index}>
@@ -25,16 +29,10 @@ const Flex = () => {
 
 function PokeInfo({ pokemon }) {
   return pokemon ? (
-    <View style={[
-      styles.container, 
-      {
-        flex: 2, 
-        marginRight: 10,
-        flexDirection: 'column',
-      }
-    ]}>
+    <View style={[styles.container, {flex: 2, marginRight: 10,flexDirection: 'column',}]}>
       <PokeImage pokemon={pokemon}/>
       <PokeDescription pokemon={pokemon}/>
+      <PrevNext></PrevNext>
     </View>
   ) : null;
 }
@@ -42,13 +40,13 @@ function PokeInfo({ pokemon }) {
 // ------------------[ PokeDesc Components ]------------------ //
 
 function PokeImage({pokemon}) {
-  return <View style={[styles.container,{flex: 1, margin: 20, alignItems: 'center'}]}>
+  return <View style={[styles.container,{flex: 4, margin: 20, alignItems: 'center'}]}>
     <Image source={pokemon.sprites.front_default} style={{ height: "100%", width: "60%" }} />
   </View>
 }
 
 function PokeDescription({pokemon}) {
-  return <View style={[styles.container,{flex: 2, margin: 20, padding: 10}]} >
+  return <View style={[styles.container,{flex: 8, margin: 20, padding: 10}]} >
     <p>Name: {pokemon.name}</p>
     <p>ID: {pokemon.id}</p>
     <p>Weight: {pokemon.weight/10}</p>
@@ -58,27 +56,33 @@ function PokeDescription({pokemon}) {
   </View>
 }
 
+function PrevNext() {
+  return <View style={[{flex: 1, flexDirection: 'row', alignContent: 'space-between', padding: 5}]}>
+    <Button input="prev"/>
+    <Button input="next"/>
+  </View>
+}
+
+function Button({input}) {
+  return (<View style={[styles.container,{backgroundColor: 'white',flex: 1, height:'80%', marginLeft: 10, marginRight: 10, alignItems: 'center', justifyContent: 'center'}]}>
+      <Text>{input}</Text>
+  </View>)
+}
+
 // ------------------[ List side ]------------------ //
 
-const PokeList = () => {
+function PokeList({onPokeCardClick}) {
   const [pokemons, setPokemons] = useState([]);
 
   useEffect(() => {
-    ShowPokemons(50).then((data) => setPokemons(data));
+    ShowPokemons(40).then((data) => setPokemons(data));
   }, []);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          flex: 7,
-        },
-      ]}
-    >
+    <View style={[styles.container,{flex: 7,},]}>
       <View style={[{ flexDirection: "row", flex: 1 }]}>
         {pokemons.slice(0, 5).map((pokemon) => (
-          <PokeCard key={pokemon.name} pokemon={pokemon} />
+          <PokeCard key={pokemon.name} pokemon={pokemon}/>
         ))}
       </View>
       <View style={[{ flexDirection: "row", flex: 1 }]}>
@@ -99,19 +103,7 @@ const PokeList = () => {
 
 function PokeCard({ pokemon }) {
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          flex: 1,
-          borderTopWidth: 1,
-          borderColor: "black",
-          backgroundColor: "white",
-          margin: 10,
-          alignItems: "center",
-        },
-      ]}
-    >
+    <View style={[styles.container, styles.pokecard]}>
       <Image source={{ uri: pokemon.image }} style={{ height: "80%", width: "80%" }} />
       <Text>{pokemon.name}</Text>
     </View>
@@ -130,11 +122,19 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 10,
     shadowColor: 'black',
-    shadowRadius: 4,
+    shadowRadius: 3,
     backgroundColor: '#F0F8FF'
   },
   image: {
     margin: 10
+  }, 
+  pokecard: {
+    flex: 1,
+    borderTopWidth: 1,
+    borderColor: "black",
+    backgroundColor: "white",
+    margin: 10,
+    alignItems: "center"
   }
 })
 
